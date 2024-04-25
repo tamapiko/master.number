@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Number Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Master Number Game</h1>
+        <div>
+            <label for="digitSelect">Select Number of Digits:</label>
+            <select id="digitSelect">
+                <option value="3">3 Digits</option>
+                <option value="4">4 Digits</option>
+                <option value="5">5 Digits</option>
+            </select>
+        </div>
+        <div>
+            <label for="hintCheckbox">Show One-digit Hint:</label>
+            <input type="checkbox" id="hintCheckbox">
+        </div>
+        <button onclick="setupGame()">Start Game</button>
+        <div id="gameArea" style="display: none;">
+            <p>Guess the number:</p>
+            <input type="text" id="guessInput">
+            <button onclick="makeGuess()">Guess</button>
+            <div id="hint"></div>
+        </div>
+    </div>
+
+    <script>
+        let masterNumber;
+        let numDigits = 3;
+        let showOneDigitHint = false;
+
+        function setupGame() {
+            const digitSelect = document.getElementById("digitSelect");
+            numDigits = parseInt(digitSelect.value);
+            showOneDigitHint = document.getElementById("hintCheckbox").checked;
+
+            initializeGame();
+            document.getElementById("gameArea").style.display = "block";
+        }
+
+        function initializeGame() {
+            masterNumber = generateMasterNumber(numDigits);
+            console.log("Master Number:", masterNumber);
+        }
+
+        function generateMasterNumber(digits) {
+            let min = Math.pow(10, digits - 1);
+            let max = Math.pow(10, digits) - 1;
+            let number = Math.floor(Math.random() * (max - min + 1)) + min;
+            return number.toString();
+        }
+
+        function makeGuess() {
+            const guessInput = document.getElementById("guessInput");
+            const guess = guessInput.value.trim();
+
+            if (guess.length !== numDigits || isNaN(guess)) {
+                alert(`Please enter a valid ${numDigits}-digit number.`);
+                return;
+            }
+
+            const hint = getHint(guess);
+
+            if (hint.pinpoint === numDigits) {
+                alert(`Congratulations! You guessed the number ${masterNumber}.`);
+                initializeGame(); // Reset game for next round
+            } else {
+                displayHint(hint);
+            }
+
+            guessInput.value = "";
+        }
+
+        function getHint(guess) {
+            let hits = 0;
+            let blows = 0;
+            let pinpoint = 0;
+
+            for (let i = 0; i < numDigits; i++) {
+                if (guess[i] === masterNumber[i]) {
+                    pinpoint++;
+                } else if (masterNumber.includes(guess[i])) {
+                    hits++;
+                } else {
+                    blows++;
+                }
+            }
+
+            return { hits, blows, pinpoint };
+        }
+
+        function displayHint(hint) {
+            const hintDiv = document.getElementById("hint");
+            let hintText = `<p>Hits: ${hint.hits}</p>`;
+            hintText += `<p>Blows: ${hint.blows}</p>`;
+            
+            if (showOneDigitHint) {
+                hintText += `<p>Pinpoint: ${hint.pinpoint}</p>`;
+            }
+
+            hintDiv.innerHTML = hintText;
+        }
+    </script>
+</body>
+</html>
